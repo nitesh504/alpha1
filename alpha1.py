@@ -12,23 +12,42 @@ from sklearn.preprocessing import StandardScaler
 from hmmlearn.hmm import GaussianHMM
 from pypfopt import expected_returns, risk_models, EfficientFrontier
 from scipy.stats import norm
+import warnings
+warnings.filterwarnings("ignore")
+
 
 # Set page configuration
 st.set_page_config(
     page_title="UTY CAPITAL - US Equity Analysis Tool 01",
     layout="wide"
 )
-PASSWORD = "prasantvai" 
-password_input = st.sidebar.text_input("Enter password", type="password")
-if password_input != PASSWORD:
-    if password_input:
-        st.sidebar.error("Incorrect password")
-    else:
-        st.sidebar.info("Please enter the password")
-    st.stop()
+
+# Define password
+CORRECT_PASSWORD = "utycapital"  # You can change this to your desired password
+
+# Initialize session state for password validation
+if 'password_correct' not in st.session_state:
+    st.session_state.password_correct = False
 
 # Title and description
 st.title("UTY CAPITAL - US Equity Analysis Tool 01")
+
+# Password protection section
+if not st.session_state.password_correct:
+    st.markdown("Please enter the password to access the application.")
+    password_input = st.text_input("Password", type="password")
+    if st.button("Submit"):
+        if password_input == CORRECT_PASSWORD:
+            st.session_state.password_correct = True
+            st.success("Password correct! Access granted.")
+            #st.experimental_rerun()  # Rerun the app to show the content
+        else:
+            st.error("Incorrect password. Please try again.")
+    
+    # Stop execution here if password is not correct
+    st.stop()
+
+# If password is correct, continue with the main application
 st.markdown("Analyze US stocks with technical indicators including 50 EMA, Hurst Exponent, Volatility Regime, Bullish/Bearish Regime, and Portfolio Optimization")
 
 # FIXED: StockRiskAnalyzer class with proper scalar handling
@@ -736,8 +755,7 @@ if analyze_button and selected_tickers:
                         "Name": r["name"],
                         "Price": f"${r['current_price']:.2f}",
                         "50 EMA": f"${r['50_ema']:.2f}",
-                        "EMA Status": r["50_ema_status"],
-                        "Hurst": r["hurst_exponent"],
+                         "Hurst": r["hurst_exponent"],
                         "Interpretation": r["hurst_interpretation"],
                         "Vol Regime": r["volatility_regime"],
                         "Trend Regime": r["bull_bear_regime"]
